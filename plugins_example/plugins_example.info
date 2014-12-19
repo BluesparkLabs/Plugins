@@ -1,0 +1,6 @@
+name = Plugins Example
+description = Example of PSR-4 based plugin system for Drupal 7
+package = Other
+core = 7.x
+
+dependencies[] = plugins

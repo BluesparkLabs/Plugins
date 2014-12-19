@@ -1,0 +1,7 @@
+name = Plugins
+description = PSR-4 based plugin system for Drupal 7
+package = Other
+core = 7.x
+
+dependencies[] = ctools
+dependencies[] = xautoload (>= 7.x-5.0)

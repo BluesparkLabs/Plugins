@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Hook implementations and basic API for Plugins module.
+ */
+
+/**
+ * Implements hook_ctools_plugin_type().
+ */
+function plugins_ctools_plugin_type() {
+  $plugins = array();
+
+  $plugin_definitions = module_invoke_all('plugins_info');
+
+  foreach ($plugin_definitions as $plugin) {
+    $plugins[$plugin['namespace']] = array(
+      'classes' => array('class'),
+      'cache' => TRUE,
+      'extension' => 'php',
+    );
+  }
+  return $plugins;
+}

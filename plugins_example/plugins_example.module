@@ -1,0 +1,60 @@
+<?php
+
+/**
+ * @file
+ * Hook implementations and basic API for Plugins module.
+ */
+
+use \Drupal\plugins_example\Plugin\Action\ActionManager;
+
+/**
+ * Implements hook_plugins_info().
+ */
+function plugins_example_plugins_info() {
+  return array(
+    array(
+      'namespace' => 'Plugin\Action',
+    ),
+  );
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ *
+ * WE SHOULD FIGURE OUT HOW TO REMOVE THIS CALL TO PROVIDE REAL PLUGIN DISCOVERY
+ */
+function plugins_example_ctools_plugin_directory($module, $type) {
+  if ($module == 'plugins') {
+    return 'src/' . str_replace("\\", DIRECTORY_SEPARATOR, $type);
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function plugins_example_menu() {
+  $items = array();
+
+  $items['admin/rsrv/plugins'] = array(
+    'title' => 'Test Bad Robot',
+    'page callback' => 'plugins_example_test_page',
+    'access arguments' => array('administer rsrv'),
+  );
+
+  return $items;
+}
+
+/**
+ * Plugins example page callback.
+ */
+function plugins_example_test_page() {
+  $output = 'Performing actions...<br />';
+  $action_manager = new ActionManager();
+
+  foreach ($action_manager->getPluginInstances() as $instance) {
+    /** @var $instance \Drupal\plugins_example\Plugin\Action\ActionInterface */
+    $output .= $instance->performAction() . '<br />';
+  }
+
+  return $output . 'Actions performed';
+}
