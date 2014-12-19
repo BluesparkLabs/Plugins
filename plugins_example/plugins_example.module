@@ -2,31 +2,30 @@
 
 /**
  * @file
- * Hook implementations and basic API for Plugins module.
+ * Hook implementations and basic API for Plugins Example module.
  */
 
 use \Drupal\plugins_example\Plugin\Action\ActionManager;
+use \Drupal\plugins_example\Plugin\Name\NameManager;
 
 /**
  * Implements hook_plugins_info().
  */
 function plugins_example_plugins_info() {
   return array(
-    array(
+    'example_action' => array(
       'namespace' => 'Plugin\Action',
     ),
   );
 }
 
 /**
- * Implements hook_ctools_plugin_directory().
- *
- * WE SHOULD FIGURE OUT HOW TO REMOVE THIS CALL TO PROVIDE REAL PLUGIN DISCOVERY
+ * Implements hook_plugins_info_alter().
  */
-function plugins_example_ctools_plugin_directory($module, $type) {
-  if ($module == 'plugins') {
-    return 'src/' . str_replace("\\", DIRECTORY_SEPARATOR, $type);
-  }
+function plugins_example_plugins_info_alter(&$info) {
+  $info['example_name'] = array(
+    'namespace' => 'Plugin\Name',
+  );
 }
 
 /**
@@ -35,10 +34,23 @@ function plugins_example_ctools_plugin_directory($module, $type) {
 function plugins_example_menu() {
   $items = array();
 
-  $items['admin/rsrv/plugins'] = array(
-    'title' => 'Test Bad Robot',
-    'page callback' => 'plugins_example_test_page',
-    'access arguments' => array('administer rsrv'),
+  $items['admin/config/plugins_example'] = array(
+    'title' => 'Test Person actions',
+    'page callback' => 'plugins_example_action_test_page',
+    'access arguments' => array('access content'),
+  );
+  $items['admin/config/plugins_example/actions'] = array(
+    'title' => 'Test Person actions',
+    'page callback' => 'plugins_example_action_test_page',
+    'access arguments' => array('access content'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+  $items['admin/config/plugins_example/names'] = array(
+    'title' => 'Test Person names',
+    'page callback' => 'plugins_example_name_test_page',
+    'access arguments' => array('access content'),
+    'type' => MENU_LOCAL_TASK,
   );
 
   return $items;
@@ -47,7 +59,7 @@ function plugins_example_menu() {
 /**
  * Plugins example page callback.
  */
-function plugins_example_test_page() {
+function plugins_example_action_test_page() {
   $output = 'Performing actions...<br />';
   $action_manager = new ActionManager();
 
@@ -57,4 +69,20 @@ function plugins_example_test_page() {
   }
 
   return $output . 'Actions performed';
+}
+
+/**
+ * Plugins example page callback.
+ */
+function plugins_example_name_test_page() {
+  plugins_get_info();
+  $output = 'Loading names...<br />';
+  $action_manager = new NameManager();
+
+  foreach ($action_manager->getPluginInstances() as $instance) {
+    /** @var $instance \Drupal\plugins_example\Plugin\Name\NameInterface */
+    $output .= $instance->tellName() . '<br />';
+  }
+
+  return $output . 'Names loaded';
 }

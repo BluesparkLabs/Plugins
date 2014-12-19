@@ -11,14 +11,74 @@
 function plugins_ctools_plugin_type() {
   $plugins = array();
 
-  $plugin_definitions = module_invoke_all('plugins_info');
+  $plugin_definitions = plugins_get_info();
 
-  foreach ($plugin_definitions as $plugin) {
-    $plugins[$plugin['namespace']] = array(
+  foreach ($plugin_definitions as $name => $plugin) {
+    $plugins[$name] = array(
       'classes' => array('class'),
       'cache' => TRUE,
       'extension' => 'php',
+      'use hooks' => TRUE,
+      'hook' => 'plugin_load',
     );
   }
   return $plugins;
+}
+
+/**
+ * Implements hook_plugins_example_action().
+ */
+function plugins_plugin_load() {
+  $plugins = array();
+
+  // This is EXTREMELY HACKY, we need to reinvent this, although I was not able
+  // to figure out how....
+  $backtrace = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 2);
+  $info = $backtrace[1]['args'][0];
+  $plugin_info = plugins_get_info($info['type']);
+  $namespace = $plugin_info['namespace'];
+
+  foreach (module_list() as $module => $info) {
+    $path = drupal_get_path('module', $module) . '/src/' . str_replace("\\", DIRECTORY_SEPARATOR, $namespace);
+    $files = file_scan_directory($path, '/\.php$/', array('key' => 'name'));
+    foreach ($files as $file) {
+      include_once $file->uri;
+      $class = '\Drupal\\' . $module . '\\' . $namespace . '\\' . $file->name;
+      $reflection_class = new ReflectionClass($class);
+      if ($reflection_class->isInstantiable() && $reflection_class->implementsInterface('\Drupal\plugins\Plugin\PluginInterface')) {
+        $plugins[$file->name] = array(
+          'class' => $class,
+          'module' => $module,
+        );
+      }
+    }
+  }
+
+  return $plugins;
+}
+
+/**
+ * Get the entity info array of an entity type.
+ *
+ * @param string|null $plugin_type
+ *   The plugin type, e.g. action, for which the info shall be returned, or NULL
+ *   to return an array with info about all types.
+ * @param bool $reset
+ *   Internal purposes, to reset the plugin static cache.
+ *
+ * @return array|null
+ *   Array containing info about specified type or all the plugin types. NULL if
+ *   the type name does not exist.
+ *
+ * @see hook_entity_info()
+ * @see hook_entity_info_alter()
+ */
+function plugins_get_info($plugin_type = NULL, $reset = FALSE) {
+  $plugin_info = drupal_static(__FUNCTION__);
+  if (!isset($plugin_info) || $reset) {
+    $plugin_info = module_invoke_all('plugins_info');
+    drupal_alter('plugins_info', $plugin_info);
+  }
+
+  return empty($plugin_type) ? $plugin_info : (isset($plugin_info[$plugin_type]) ? $plugin_info[$plugin_type] : NULL);
 }

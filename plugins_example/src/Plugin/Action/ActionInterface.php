@@ -17,7 +17,7 @@ interface ActionInterface extends PluginInterface {
   /**
    * Executes and action.
    *
-   * @return bool
+   * @return string
    *   The result of the action.
    */
   public function performAction();

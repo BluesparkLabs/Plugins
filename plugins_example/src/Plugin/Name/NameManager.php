@@ -2,23 +2,23 @@
 
 /**
  * @file
- * Contains \Drupal\plugins_example\Plugin\Action\ActionManager.
+ * Contains \Drupal\plugins_example\Plugin\Emotion\NameManager.
  */
 
-namespace Drupal\plugins_example\Plugin\Action;
+namespace Drupal\plugins_example\Plugin\Name;
 
 use Drupal\plugins\Plugin\PluginManagerBase;
 
 /**
  * Defines the plugin manager for person actions.
  */
-class ActionManager extends PluginManagerBase {
+class NameManager extends PluginManagerBase {
 
   /**
    * {@inheritdoc}
    */
   public function __construct() {
-    $this->pluginType = 'example_action';
+    $this->pluginType = 'example_name';
   }
 
 }
