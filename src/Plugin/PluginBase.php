@@ -43,7 +43,7 @@ abstract class PluginBase implements PluginInterface {
   );
 
   /**
-   * Constructs the robot plugin object.
+   * Constructs the plugin object.
    *
    * @param string $id
    *   The plugin id.

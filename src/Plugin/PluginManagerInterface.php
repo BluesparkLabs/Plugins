@@ -17,4 +17,15 @@ interface PluginManagerInterface {
    */
   public function getPluginInstances();
 
+  /**
+   * Gets plugins instance.
+   *
+   * @var string $plugin_id
+   *   The desired plugin id
+   *
+   * @return \Drupal\plugins\Plugin\PluginInterface
+   *   The \Drupal\plugins\Plugin\PluginInterface requested.
+   */
+  public function getPluginInstance($plugin_id);
+
 }
